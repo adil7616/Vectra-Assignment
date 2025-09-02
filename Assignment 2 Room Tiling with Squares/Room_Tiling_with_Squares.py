@@ -11,71 +11,75 @@ tile_sizes = {
 }
 
 # Generating coordinates in a spiral pattern from the center.
-def spiral_indices(m, n):
-    
-    center_x, center_y = m // 2, n // 2
-    x, y = center_x, center_y
+def spiral_indices(rows, cols):
+    cx, cy = rows // 2, cols // 2
+    x, y = cx, cy
     dx, dy = 0, -1
-    for _ in range(max(m, n) ** 2):
-        if 0 <= x < m and 0 <= y < n:
+    for _ in range(max(rows, cols) ** 2):
+        if 0 <= x < rows and 0 <= y < cols:
             yield (x, y)
-            
-        if (x - center_x == y - center_y) or \
-            (x - center_x < 0 and x - center_x == -(y - center_y)) or \
-            (x - center_x > 0 and x - center_x == 1 - (y - center_y)):
+        # turning condition
+        if (x - cx == y - cy) or \
+            (x - cx < 0 and x - cx == -(y - cy)) or \
+            (x - cx > 0 and x - cx == 1 - (y - cy)):
             dx, dy = -dy, dx
         x, y = x + dx, y + dy
 
 
 # Checking if a tile of given size can be placed at (x,y).
-def can_place(grid, x, y, size, m, n):
-
-    if x + size > m or y + size > n:
+def can_place(grid, x, y, size, rows, cols):
+    if x + size > rows or y + size > cols:
         return False
-    return np.all(grid[x:x+size, y:y+size] == 0)
+    block = grid[x:x+size, y:y+size]
+    return np.all(block == 0)
 
 
 # Placing a tile of given size on the grid.
 def place_tile(grid, x, y, size, tile_id):
-    
     grid[x:x+size, y:y+size] = tile_id
 
-# Filling m x n grid with square tiles in spiral order
-def tile_room(m, n):
-    grid = np.zeros((m, n), dtype=int)
-    tile_counts = {1:0, 2:0, 3:0, 4:0}
-    tile_id = 1
 
-    for x, y in spiral_indices(m, n):
+# Filling m x n grid with square tiles in spiral order
+def tile_room(rows, cols):
+    grid = np.zeros((rows, cols), dtype=int)
+    cnts = {1: 0, 2: 0, 3: 0, 4: 0}
+    tid = 1
+
+    for x, y in spiral_indices(rows, cols):
         if grid[x, y] != 0:
             continue
-        for size in sorted(tile_sizes.keys(), reverse=True):
-            if can_place(grid, x, y, size, m, n):
-                place_tile(grid, x, y, size, tile_id)
-                tile_counts[size] += 1
-                tile_id += 1
+        for sz in sorted(tile_sizes.keys(), reverse=True):
+            if can_place(grid, x, y, sz, rows, cols):
+                place_tile(grid, x, y, sz, tid)
+                cnts[sz] += 1
+                tid += 1
                 break
-    return grid, tile_counts  # Return the grid and tile counts
+    return grid, cnts
+
 
 # Plotting the tiling
-def plot_tiling(grid, tile_counts):
-    m, n = grid.shape
+def plot_tiling(grid, cnts):
+    rows, cols = grid.shape
     fig, ax = plt.subplots(figsize=(8, 6))
-    for i in range(m):
-        for j in range(n):
-            tile_id = grid[i, j]
-            if tile_id != 0:
-                for size, color in tile_sizes.items():  # Find the size based on contiguous cells
-                    if i + size <= m and j + size <= n and np.all(grid[i:i+size, j:j+size] == tile_id):
-                        rect = plt.Rectangle((j, m-i-size), size, size, facecolor=color, edgecolor="black")
+    for i in range(rows):
+        for j in range(cols):
+            tid = grid[i, j]
+            if tid == 0:
+                continue
+            # figure out tile size by checking contiguous block
+            for sz, color in tile_sizes.items():
+                if i + sz <= rows and j + sz <= cols:
+                    block = grid[i:i+sz, j:j+sz]
+                    if np.all(block == tid):
+                        rect = plt.Rectangle((j, rows - i - sz), sz, sz,
+                                                facecolor=color, edgecolor="black")
                         ax.add_patch(rect)
                         break
-                    
-    
-    ax.set_xlim(0, n)
-    ax.set_ylim(0, m)
-    ax.set_xticks(range(n+1))
-    ax.set_yticks(range(m+1))
+
+    ax.set_xlim(0, cols)
+    ax.set_ylim(0, rows)
+    ax.set_xticks(range(cols + 1))
+    ax.set_yticks(range(rows + 1))
     ax.set_xticklabels([])
     ax.set_yticklabels([])
     ax.grid(True, which='both', color='lightgrey', linewidth=0.5)
@@ -84,10 +88,11 @@ def plot_tiling(grid, tile_counts):
     plt.show()
 
     print("Tile counts:")
-    for size in sorted(tile_counts.keys(), reverse=True):
-        print(f"{size}x{size}: {tile_counts[size]}")
+    for sz in sorted(cnts.keys(), reverse=True):
+        print(f"{sz}x{sz}: {cnts[sz]}")
+
 
 # Example with height and width
-m, n = 12, 8
-grid, tile_counts = tile_room(m, n)
-plot_tiling(grid, tile_counts)
+rows, cols = 12, 8
+grid, cnts = tile_room(rows, cols)
+plot_tiling(grid, cnts)
