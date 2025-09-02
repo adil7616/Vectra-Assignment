@@ -37,7 +37,7 @@ results.xlsx    # Output file with results and charts
 assignment1.py  # Script
 
 
-# Assignment 2 – Polygon Geometry Analysis
+# Assignment 1b – Polygon Geometry Analysis
 
 **File:** `polygon_gy.py`
 
@@ -76,7 +76,7 @@ Centroid (Manual): [7.41, 2.75]
 Centroid (Shapely): [7.41, 2.75]
 
 
-# Assignment 3 – Room Tiling with Square Tiles
+# Assignment 2 – Room Tiling with Square Tiles
 
 **File:** `Room_Tiling_with_Squares.py`
 
@@ -103,7 +103,7 @@ Install the required libraries: pip install numpy matplotlib
 Run the script directly: python Room_Tiling_with_Squares.py
 
 
-# Assignment 4 – Pyramid of Equilateral Triangles
+# Assignment 3 – Pyramid of Equilateral Triangles
 
 **File:** `Pyramid.py`
 ## Description
@@ -123,3 +123,4 @@ Install the required libraries: pip install numpy matplotlib
 
 **How to Run**
 Run the script directly: python Pyramid.py
+
